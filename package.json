@@ -1,0 +1,15 @@
+{
+  "name": "ssc-server",
+  "version": "0.1.0",
+  "description": "Source Of Some Certainty",
+  "dependencies": {
+    "request": "2.74.0",
+    "express": "4.14.0",
+    "lodash": "4.14.1",
+    "async": "2.0.1"
+  },
+  "engines": {
+    "node": ">=4.2.2"
+  },
+  "private": true
+}
