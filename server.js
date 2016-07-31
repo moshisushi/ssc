@@ -9,7 +9,7 @@ var freesoundToken = "Token " + conf.freesound.token;
 
 var app = express();
 app.use("/media", express.static(conf.downloadDir));
-app.use("/static", express.static(__dirname + "/static"));
+app.use("/", express.static(__dirname + "/static"));
 
 function searchSounds(keyword, limit, cb) {
     var options = {
@@ -64,6 +64,7 @@ function getSoundURL(id, cb) {
 }
 
 function downloadSound(id, cb) {
+    // XXX: Add fs cache lookup
     getSoundURL(id, function(err, url) {
         if(err) {
             return cb(err);
@@ -77,6 +78,7 @@ function downloadSound(id, cb) {
 
         var fname = "freesound_" + id + ".ogg";
         var path = conf.downloadDir + "/" + fname;
+        // XXX: Change to tmp dir + atomic rename
         var stream = request.get(options).pipe(fs.createWriteStream(path));
         stream.on('finish', function () {
             console.log("Download complete: id=" + id);
