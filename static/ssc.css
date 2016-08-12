@@ -68,3 +68,7 @@ body {
     visibility: hidden;
 }
 
+.stream-word:hover {
+    cursor: pointer;
+    color: #aaaaaa;
+}

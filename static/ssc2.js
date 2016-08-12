@@ -1,4 +1,5 @@
 function buildPlayer(url, index) {
+    console.log("buildPlayer: " + url);
     return '<div id="audioplayer-' + index + '-container">' +
         '<audio id="audioplayer-' + index +
         '" controls="controls" autoplay loop>' +
@@ -22,8 +23,8 @@ function fadeIn(index, done) {
     pl.volume = vol;
     function loop() {
         vol += 0.006;
-        if (vol >= 1.0) {
-            pl.volume = 1.0;
+        if (vol >= 0.3) {
+            pl.volume = 0.3;
             console.log("player " + index + " fade in completed");
             pl.removeEventListener("playing", loop);
             if (done) done();
@@ -86,7 +87,9 @@ function addWordLine(wordIterator) {
         } else {
             line.push(dashes);
         }
-        line.push(w);
+        var tag = '<span class="stream-word" onClick="search(' + 
+            "'" + w + "'" + ');">' + w + '</span>';
+        line.push(tag);
 
         lineLength += w.length + numDashes * 1.5;
         wordNum++;
@@ -253,6 +256,55 @@ function scroll() {
     setTimeout(scroll, 50);
 }
 
+var playerCount = 0;
+var lastPlayerIndices = [];
+
+function search(keyword) {
+    var results = $("#results");
+    var status = $("#status");
+    status.html("Searching...");
+
+    keyword = _.trim(keyword).toLowerCase();
+    //button.attr("disabled", true);
+    $.get("/ssc/freesound/search/?q=" + keyword + 
+          "&f=duration%3A%5B1+TO+60%5D&s=score+desc&advanced=1&g=", function(res) {
+        var pattern = /(\/data\/previews\/[^"]*\.ogg)/;
+        var sounds = [];
+        _.each(res.split('\n'), function(line) {
+            var match = line.match(pattern);
+            if (!match) return true;
+            sounds.push("/ssc/freesound" + match[1]);
+            if (sounds.length === 3) return false;
+        });
+        //button.attr("disabled", false);
+        status.html("Found " + sounds.length + " sounds (result cap=3)");
+        if (sounds.length === 0) {
+            return;
+        }
+        var playerIndices = [];
+        var i = 0;
+        _.each(sounds, function(url) {
+            results.append(buildPlayer(url, playerCount));
+            jumpAround(playerCount);
+            playerIndices.push(playerCount);
+            var toFade = lastPlayerIndices.length > 0 ? [lastPlayerIndices.shift()] : [];
+            i++;
+            if (i === res.length && lastPlayerIndices.length > 0) {
+                // Last new player, so add fade out hooks to any remaining players 
+                toFade = _.concat(toFade, lastPlayerIndices);
+            }
+            fadeIn(playerCount, function () {
+                _.each(toFade, fadeOut);
+            });
+            playerCount++;
+        });
+        lastPlayerIndices = playerIndices;
+    }).fail(function() {
+        //button.attr("disabled", false);
+        status.html("Error :(");
+    });
+}
+
 $(function () {
     var wordIterator = createWordIterator();
     
@@ -261,8 +313,6 @@ $(function () {
     }
     scroll();
 
-    var playerCount = 0;
-    var lastPlayerIndices = [];
 
     $("#searchform").submit(function(event) {
         event.preventDefault();
@@ -274,38 +324,6 @@ $(function () {
 
         if(!keyword) return;
 
-        var results = $("#results");
-        var status = $("#status");
-        status.html("Fetching sounds... (could take a few seconds)");
- 
-        button.attr("disabled", true);
-        $.get("getsounds?keywords=" + keyword, function(res) {
-            button.attr("disabled", false);
-            status.html("Download complete! Found " + _.size(res) + " sounds (result cap=3)");
-            if (res.length === 0) {
-                return;
-            }
-            var playerIndices = [];
-            var i = 0;
-            _.each(res, function(url) {
-                results.append(buildPlayer(url, playerCount));
-                jumpAround(playerCount);
-                playerIndices.push(playerCount);
-                var toFade = lastPlayerIndices.length > 0 ? [lastPlayerIndices.shift()] : [];
-                i++;
-                if (i === res.length && lastPlayerIndices.length > 0) {
-                    // Last new player, so add fade out hooks to any remaining players 
-                    toFade = _.concat(toFade, lastPlayerIndices);
-                }
-                fadeIn(playerCount, function () {
-                    _.each(toFade, fadeOut);
-                });
-                playerCount++;
-            });
-            lastPlayerIndices = playerIndices;
-        }).fail(function() {
-            button.attr("disabled", false);
-            status.html("Error :(");
-        });
+        search(keyword);
     });
 });
