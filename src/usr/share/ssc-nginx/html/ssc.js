@@ -13,7 +13,6 @@ function getPlayer(index) {
 }
 
 function removePlayer(index) {
-    console.log("player " + index + " remove");
     return $("#audioplayer-" + index + "-container").remove();
 }
 
@@ -33,10 +32,14 @@ function fadeIn(index, done) {
             setTimeout(loop, 10);
         }
     };
-    pl.addEventListener("playing", loop);
+    pl.addEventListener("playing", function (e) {
+        e.srcElement.removeEventListener("playing", arguments.callee);
+        loop();
+    });
 }
 
-function fadeOut(index, done) {
+function fadeOut(index) {
+    console.log("player " + index + " fade out started");
     var pl = getPlayer(index);
     var vol = pl.volume;
     function loop() {
@@ -45,7 +48,6 @@ function fadeOut(index, done) {
             pl.volume = 0.0;
             console.log("player " + index + " fade out completed");
             removePlayer(index);
-            if (done) done();
         } else {
             pl.volume = vol;
             setTimeout(loop, 10);
@@ -256,17 +258,37 @@ function scroll() {
     setTimeout(scroll, 50);
 }
 
-var playerCount = 0;
-var lastPlayerIndices = [];
+var play = (function () {
+    var playerCount = 0;
+    var previousPlayers = []
+
+    return function (sounds) {
+        var players = [];
+        var playersElem = $("#players");
+        var toFadeOut = _.clone(previousPlayers);
+        // Replace (cross-fade) players one by one
+        _.each(sounds, function(url) {
+            playerCount++;
+            players.push(playerCount);
+            playersElem.append(buildPlayer(url, playerCount));
+            jumpAround(playerCount);
+            var oldPlayer = toFadeOut.shift();
+            fadeIn(playerCount, function () {
+                if (oldPlayer !== undefined) fadeOut(oldPlayer);
+            });
+        });
+        // Fade out remaining players, if any
+        _.each(toFadeOut, fadeOut);
+        previousPlayers = players;
+    };
+})();
 
 function search(keyword) {
-    var results = $("#results");
     var status = $("#status");
     status.html("Searching...");
     $("#keyword-input")[0].value = keyword;
 
     keyword = _.trim(keyword).toLowerCase();
-    //button.attr("disabled", true);
     $.get("/ssc/freesound/search/?q=" + keyword + 
           "&f=duration%3A%5B1+TO+60%5D&s=score+desc&advanced=1&g=", function(res) {
         var pattern = /(\/data\/previews\/[^"]*\.ogg)/;
@@ -277,31 +299,12 @@ function search(keyword) {
             sounds.push("/ssc/freesound" + match[1]);
             if (sounds.length === 3) return false;
         });
-        //button.attr("disabled", false);
         status.html("Found " + sounds.length + " " + (sounds.length === 1 ? "sound" : "sounds"));
         if (sounds.length === 0) {
             return;
         }
-        var playerIndices = [];
-        var i = 0;
-        _.each(sounds, function(url) {
-            results.append(buildPlayer(url, playerCount));
-            jumpAround(playerCount);
-            playerIndices.push(playerCount);
-            var toFade = lastPlayerIndices.length > 0 ? [lastPlayerIndices.shift()] : [];
-            i++;
-            if (i === res.length && lastPlayerIndices.length > 0) {
-                // Last new player, so add fade out hooks to any remaining players 
-                toFade = _.concat(toFade, lastPlayerIndices);
-            }
-            fadeIn(playerCount, function () {
-                _.each(toFade, fadeOut);
-            });
-            playerCount++;
-        });
-        lastPlayerIndices = playerIndices;
+        play(sounds);
     }).fail(function() {
-        //button.attr("disabled", false);
         status.html("Error :(");
     });
 }
