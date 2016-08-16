@@ -16,6 +16,12 @@ function removePlayer(index) {
     return $("#audioplayer-" + index + "-container").remove();
 }
 
+/*
+ * XXX: Fade-out does not cancel an ongoing fade-in. This is not a
+ * problem as long as fade-in and fade-out speeds are different
+ * (otherwise you could get stuck, with fade-in and fade-out processes
+ * cancelling each other out). 
+ */
 function fadeIn(index, done) {
     var pl = getPlayer(index);
     var vol = 0.0;
@@ -25,7 +31,6 @@ function fadeIn(index, done) {
         if (vol >= 0.3) {
             pl.volume = 0.3;
             console.log("player " + index + " fade in completed");
-            pl.removeEventListener("playing", loop);
             if (done) done();
         } else {
             pl.volume = vol;
