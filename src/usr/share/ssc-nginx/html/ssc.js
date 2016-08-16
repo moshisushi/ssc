@@ -263,6 +263,7 @@ function search(keyword) {
     var results = $("#results");
     var status = $("#status");
     status.html("Searching...");
+    $("#keyword-input")[0].value = keyword;
 
     keyword = _.trim(keyword).toLowerCase();
     //button.attr("disabled", true);
@@ -277,7 +278,7 @@ function search(keyword) {
             if (sounds.length === 3) return false;
         });
         //button.attr("disabled", false);
-        status.html("Found " + sounds.length + " sounds (result cap=3)");
+        status.html("Found " + sounds.length + " " + (sounds.length === 1 ? "sound" : "sounds"));
         if (sounds.length === 0) {
             return;
         }

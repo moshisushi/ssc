@@ -8,14 +8,22 @@
         <link rel="stylesheet" type="text/css" href="ssc.css">
     </head>
     <body>
-        <h3>SSC/3</h3>
-        <form id="searchform" action="">
-            <label>Enter keyword:</label>
-            <input type="text" id="keyword-input" value="" onclick="this.select()" />
-            <input type="submit" id="go-button" value="Go" />
-        </form>
+        <div id="content-area upper-left">
+            <div id="logo" class="upper-left">SSC/3</div>
+            <form id="searchform" action="">
+                <div id="searchinputs" class="content-area upper-left">
+                    <div id="searchbar-container">
+                        <input type="text" id="keyword-input" value="Search" onclick="this.value=''" />
+                    </div>
+                </div>
+                <div class="content-area upper-left">
+                    <div id="statusbox">
+                        <span>Status:&nbsp;</span><span id="status">Idle</span>
+                    </div>
+                </div>
+            </form>
+        </div>
 
-        <div>Status: <span id="status">Idle</span></div>
 
         <div id="word-scroll-area"></div>
         <div id="highlighter"></div>
