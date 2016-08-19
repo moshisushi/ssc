@@ -110,139 +110,8 @@ function addWordLine(wordIterator) {
     };
 }
 
-var createWordIterator = function () {
+var createWordIterator = function (words) {
     var index = 0;
-    var words = [
-        "Contrary",
-        "popular",
-        "belief",
-        "Lorem",
-        "Ipsum",
-        "simply",
-        "random",
-        "has",
-        "roots",
-        "piece",
-        "classical",
-        "Latin",
-        "literature",
-        "making",
-        "over",
-        "2000",
-        "years",
-        "old",
-        "Richard",
-        "McClintock",
-        "Latin",
-        "professor",
-        "College",
-        "Virginia",
-        "looked",
-        "more",
-        "obscure",
-        "Latin",
-        "words",
-        "consectetur",
-        "Lorem",
-        "Ipsum",
-        "passage",
-        "going",
-        "through",
-        "cites",
-        "word",
-        "classical",
-        "literature",
-        "discovered",
-        "undoubtable",
-        "source",
-        "Lorem",
-        "Ipsum",
-        "comes",
-        "from",
-        "sections",
-        "Finibus",
-        "Bonorum",
-        "Malorum",
-        "Extremes",
-        "Good",
-        "and",
-        "Evil",
-        "Cicero",
-        "written",
-        "This",
-        "book",
-        "treatise",
-        "theory",
-        "ethics",
-        "very",
-        "popular",
-        "Contrary",
-        "popular",
-        "belief",
-        "Lorem",
-        "Ipsum",
-        "simply",
-        "random",
-        "has",
-        "roots",
-        "piece",
-        "classical",
-        "Latin",
-        "literature",
-        "making",
-        "over",
-        "2000",
-        "years",
-        "old",
-        "Richard",
-        "McClintock",
-        "Latin",
-        "professor",
-        "College",
-        "Virginia",
-        "looked",
-        "more",
-        "obscure",
-        "Latin",
-        "words",
-        "consectetur",
-        "Lorem",
-        "Ipsum",
-        "passage",
-        "going",
-        "through",
-        "cites",
-        "word",
-        "classical",
-        "literature",
-        "discovered",
-        "undoubtable",
-        "source",
-        "Lorem",
-        "Ipsum",
-        "comes",
-        "from",
-        "sections",
-        "Finibus",
-        "Bonorum",
-        "Malorum",
-        "Extremes",
-        "Good",
-        "and",
-        "Evil",
-        "Cicero",
-        "written",
-        "This",
-        "book",
-        "treatise",
-        "theory",
-        "ethics",
-        "very",
-        "popular",
-        "during",
-        "during",
-        "Renaissance"
-    ];
 
     return {
         next: function () {
@@ -288,6 +157,10 @@ var play = (function () {
     };
 })();
 
+function hello(keyword) {
+    $.get("/ssc/hello?w=" + keyword);
+}
+
 function search(keyword) {
     var status = $("#status");
     status.html("Searching...");
@@ -308,6 +181,7 @@ function search(keyword) {
         if (sounds.length === 0) {
             return;
         }
+        hello(keyword);
         play(sounds);
     }).fail(function() {
         status.html("Error :(");
@@ -315,12 +189,15 @@ function search(keyword) {
 }
 
 $(function () {
-    var wordIterator = createWordIterator();
-    
-    for (var i = 0; i < 1000; i++) {
-        addWordLine(wordIterator);
-    }
-    scroll();
+    $.get("/ssc/words", function(res) {
+        console.log(res.words);
+        var wordIterator = createWordIterator(res.words);
+
+        for (var i = 0; i < 1000; i++) {
+            addWordLine(wordIterator);
+        }
+        scroll();
+    });
 
 
     $("#searchform").submit(function(event) {
