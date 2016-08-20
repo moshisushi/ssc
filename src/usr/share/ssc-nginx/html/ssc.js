@@ -115,7 +115,7 @@ var createWordIterator = function (words) {
 
     return {
         next: function () {
-            var word = words[index];
+            var word = decodeURIComponent(words[index]);
             index++;
             if (index === words.length) {
                 index = 0;
@@ -190,7 +190,6 @@ function search(keyword) {
 
 $(function () {
     $.get("/ssc/words", function(res) {
-        console.log(res.words);
         var wordIterator = createWordIterator(res.words);
 
         for (var i = 0; i < 1000; i++) {

@@ -9,6 +9,7 @@ body {
     font-size: 12pt;
     margin: 0 !important;
     padding: 0 !important;
+    color: #ffffff;
 }
 
 input[type="text"] {
@@ -26,7 +27,7 @@ input[type="text"] {
     top: 0; left: 50%;
     margin-top: 0px;
     margin-left: -175px;
-    background-color: #ffff00
+    background-color: #ffff00;
 }
 
 #word-scroll {
@@ -39,6 +40,7 @@ input[type="text"] {
     text-align: center;
     white-space: nowrap;
     font-size: 14pt;
+    color: #000000;
 }
 
 #word-scroll-crop {

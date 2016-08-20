@@ -1,0 +1,49 @@
+<html>
+    <head>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.14.1/lodash.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="ssc.css">
+        <style>
+            body {
+                margin: 5px !important;
+            }
+            td {
+                padding-right: 50px;
+            }
+            th {
+                text-align: left;
+            }
+        </style>
+    </head>
+    <body>
+
+        <p>SSC/3 top 100</p>
+        <br />
+        <table id="toplist">
+        </table>
+
+        <script>
+            $(function() {
+
+                function get() {
+                    $.get("/ssc/toplist", function(toplist) {
+                        var table = $("#toplist");
+                        table.html("<tr><th>pos</th><th>word</th><th>score</th></tr>");
+                        var idx = 1;
+                        _.each(toplist, function(entry) {
+                            var word = decodeURIComponent(entry[0]);
+                            var score = entry[1];
+                            table.append("<tr><td>" + idx + "</td><td>" + word +
+                                         "</td><td>" + score + "</td></tr>");
+                            idx++;
+                        });
+                    });
+                }
+
+                get();
+                setInterval(get, 10000);
+            });
+        </script>
+    </body>
+
+</html>
