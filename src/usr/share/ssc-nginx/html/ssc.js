@@ -76,9 +76,10 @@ function jumpAround(index) {
 
 function addWordLine(wordIterator) {
     var el = $("#word-scroll");
+    var lastTop = $("#word-scroll span.word-line").last().css('top');
     var lineLength = 0;
     var wordNum = 0;
-    var line = ['<span>'];
+    var line = ['<span class="word-line">'];
     while(true) {
         var w = wordIterator.next();
         var randLower = 3;
@@ -105,7 +106,14 @@ function addWordLine(wordIterator) {
             el.append(_.join(line, ""));
             el.append("</span>");
             el.append("<br />");
-            return;
+            var newLine = $("#word-scroll span.word-line").last();
+            if (lastTop) {
+                newLine.css('top', lastTop);
+                newLine.css('top', '+=20px');
+            }
+
+            var topVal = parseFloat(newLine.css('top'));
+            return topVal;
         }
     };
 }
@@ -125,10 +133,8 @@ var createWordIterator = function (words) {
     };
 };
 
-var scrollPos = 0;
 function scroll() {
-    $("#word-scroll").css("margin-top", "" + scrollPos + "px");
-    scrollPos -= 1;
+    $("#word-scroll span.word-line").css('top', '-=1px');
     setTimeout(scroll, 50);
 }
 
@@ -188,16 +194,42 @@ function search(keyword) {
     });
 }
 
-$(function () {
+function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+    while (0 !== currentIndex) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+    return array;
+}
+
+function addWords() {
     $.get("/ssc/words", function(res) {
+        shuffle(res.words);
         var wordIterator = createWordIterator(res.words);
 
-        for (var i = 0; i < 1000; i++) {
-            addWordLine(wordIterator);
+        $("#word-scroll span.word-line").each(function (idx, el) {
+            var sel = $(el);
+            var pos = parseFloat(sel.css('top'));
+            if(pos < -100) {
+                sel.remove();
+            }
+        });
+        var pos = 0;
+        while (pos < window.innerHeight * 1.5) {
+            pos = addWordLine(wordIterator);
         }
-        scroll();
     });
 
+    setTimeout(addWords, 10000);
+}
+
+$(function () {
+    addWords();
+    scroll();
 
     $("#searchform").submit(function(event) {
         event.preventDefault();

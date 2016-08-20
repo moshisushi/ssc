@@ -122,6 +122,14 @@ input[type="text"] {
     text-align: right;
 }
 
+.word-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
 .stream-word:hover {
     cursor: pointer;
     color: #aaaaaa;

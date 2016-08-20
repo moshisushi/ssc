@@ -11,7 +11,7 @@ if not ok then
     return
 end
 
-res, err = red:srandmember("words", 1000)
+res, err = red:srandmember("words", 300)
 if err then
     ngx.log(ngx.ERR, "Failed to get random words from Redis", err)
     ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
