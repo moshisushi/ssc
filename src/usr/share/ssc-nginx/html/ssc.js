@@ -1,3 +1,5 @@
+var fadeSpeed = 0.003;
+
 function buildPlayer(url, index) {
     console.log("buildPlayer: " + url);
     return '<div id="audioplayer-' + index + '-container">' +
@@ -20,14 +22,14 @@ function removePlayer(index) {
  * XXX: Fade-out does not cancel an ongoing fade-in. This is not a
  * problem as long as fade-in and fade-out speeds are different
  * (otherwise you could get stuck, with fade-in and fade-out processes
- * cancelling each other out). 
+ * cancelling each other out).
  */
 function fadeIn(index, done) {
     var pl = getPlayer(index);
     var vol = 0.0;
     pl.volume = vol;
     function loop() {
-        vol += 0.006;
+        vol += fadeSpeed;
         if (vol >= 0.3) {
             pl.volume = 0.3;
             console.log("player " + index + " fade in completed");
@@ -48,7 +50,7 @@ function fadeOut(index) {
     var pl = getPlayer(index);
     var vol = pl.volume;
     function loop() {
-        vol -= 0.003;
+        vol -= fadeSpeed / 2;
         if (vol <= 0.0) {
             pl.volume = 0.0;
             console.log("player " + index + " fade out completed");
@@ -95,7 +97,7 @@ function addWordLine(wordIterator) {
         } else {
             line.push(dashes);
         }
-        var tag = '<span class="stream-word" onClick="search(' + 
+        var tag = '<span class="stream-word" onClick="streamSearch(' +
             "'" + w + "'" + ');">' + w + '</span>';
         line.push(tag);
 
@@ -105,7 +107,6 @@ function addWordLine(wordIterator) {
             line.push("------------------------------------");
             el.append(_.join(line, ""));
             el.append("</span>");
-            el.append("<br />");
             var newLine = $("#word-scroll span.word-line").last();
             if (lastTop) {
                 newLine.css('top', lastTop);
@@ -138,13 +139,13 @@ function scroll() {
     setTimeout(scroll, 50);
 }
 
-var play = (function () {
-    var playerCount = 0;
+var playerCount = 0;
+function createPlayerControl(containerId) {
     var previousPlayers = []
 
     return function (sounds) {
         var players = [];
-        var playersElem = $("#players");
+        var playersElem = $(containerId);
         var toFadeOut = _.clone(previousPlayers);
         // Replace (cross-fade) players one by one
         _.each(sounds, function(url) {
@@ -161,19 +162,29 @@ var play = (function () {
         _.each(toFadeOut, fadeOut);
         previousPlayers = players;
     };
-})();
+}
 
 function hello(keyword) {
     $.get("/ssc/hello?w=" + keyword);
 }
 
-function search(keyword) {
-    var status = $("#status");
+function streamSearch(keyword) {
+    // TODO: get selected search
+    var input = $(".keyword-input").first();
+    search(input, keyword);
+}
+
+var playLeft = createPlayerControl("#players-0");
+var playRight = createPlayerControl("#players-1");
+
+function search(input, keyword) {
+    var isLeftPlayer = input[0].id === "keyword-input-left";
+    var status = isLeftPlayer ? $("#status-left") : $("#status-right");
     status.html("Searching...");
-    $("#keyword-input")[0].value = keyword;
+    input.val(keyword);
 
     keyword = _.trim(keyword).toLowerCase();
-    $.get("/ssc/freesound/search/?q=" + keyword + 
+    $.get("/ssc/freesound/search/?q=" + keyword +
           "&f=duration%3A%5B1+TO+60%5D&s=score+desc&advanced=1&g=", function(res) {
         var pattern = /(\/data\/previews\/[^"]*\.ogg)/;
         var sounds = [];
@@ -183,12 +194,17 @@ function search(keyword) {
             sounds.push("/ssc/freesound" + match[1]);
             if (sounds.length === 3) return false;
         });
-        status.html("Found " + sounds.length + " " + (sounds.length === 1 ? "sound" : "sounds"));
+        status.html("found " + sounds.length + " " + (sounds.length === 1 ? "sound" : "sounds") +
+                " (limit: 3)");
         if (sounds.length === 0) {
             return;
         }
         hello(keyword);
-        play(sounds);
+        if(input[0].id === "keyword-input-left") {
+            playLeft(sounds);
+        } else {
+            playRight(sounds);
+        };
     }).fail(function() {
         status.html("Error :(");
     });
@@ -227,20 +243,35 @@ function addWords() {
     setTimeout(addWords, 10000);
 }
 
-$(function () {
-    addWords();
-    scroll();
+function initKeywordInputs() {
+    $(".keyword-input").val(defaultInput).blur(function(e) {
+        var el = $(e.target);
+        if (!el.val()) {
+            el.val(defaultInput);
+        }
+    });
+}
 
-    $("#searchform").submit(function(event) {
+function initSearch() {
+    $(".searchform").submit(function(event) {
         event.preventDefault();
 
-        var input = $("#keyword-input");
-        var button = $("#go-button");
+        var input = $(event.target).find("input");
+
         var keyword = input.val();
         input.blur();
 
         if(!keyword) return;
 
-        search(keyword);
+        search(input, keyword);
     });
+}
+
+var defaultInput = "type";
+
+$(function () {
+    addWords();
+    scroll();
+    initKeywordInputs();
+    initSearch();
 });

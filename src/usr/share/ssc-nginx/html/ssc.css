@@ -18,6 +18,7 @@ input[type="text"] {
     border-style: none;
     outline: none;
     padding: 0px;
+    background-color: transparent;
 }
 
 #word-scroll-area {
@@ -92,12 +93,50 @@ input[type="text"] {
     pointer-events: auto;
 }
 
+.search-area {
+    width: -moz-calc(50% - 175px - 10px);
+    width: -webkit-calc(50% - 175px - 10px);
+    width: calc(50% - 175px - 10px);
+    height: 125px;
+    overflow: hidden;
+    margin-top: -62px;
+    pointer-events: none;
+}
+
+.search-area * {
+    pointer-events: auto;
+}
+
 .upper-left {
     position: absolute;
     top: 5px; left: 5px;
 }
 
-#players {
+.mid-left {
+    position: absolute;
+    top: 50%; left: 5px;
+}
+
+.mid-right {
+    position: absolute;
+    top: 50%; left: 50%;
+    margin-left: 175px;
+}
+
+.bottom-left {
+    position: absolute;
+    top: 50%; left: 5px;
+    margin-top: 62px;
+}
+
+.bottom-right {
+    position: absolute;
+    top: 50%; left: 50%;
+    margin-top: 62px;
+    margin-left: 175px;
+}
+
+.player-container {
     visibility: hidden;
 }
 
@@ -105,21 +144,21 @@ input[type="text"] {
     position: relative;
     top: 50%;
     width: 100%;
-    margin-top: -20px;
+    margin-top: -10px;
 }
 
-#keyword-input {
+.keyword-input {
     text-align: center;
     width: 100%;
 }
 
-#statusbox {
+.statusbox {
     vertical-align: bottom;
     position: relative;
     top: 100%;
     height: 20px;
     margin-top: -20px;
-    text-align: right;
+    text-align: center;
 }
 
 .word-line {

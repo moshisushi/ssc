@@ -10,18 +10,6 @@
     <body>
         <div id="content-area upper-left">
             <div id="logo" class="upper-left">SSC/3</div>
-            <form id="searchform" action="">
-                <div id="searchinputs" class="content-area upper-left">
-                    <div id="searchbar-container">
-                        <input type="text" id="keyword-input" value="Search" onclick="this.value=''" />
-                    </div>
-                </div>
-                <div class="content-area upper-left">
-                    <div id="statusbox">
-                        <span>Status:&nbsp;</span><span id="status">Idle</span>
-                    </div>
-                </div>
-            </form>
         </div>
 
 
@@ -32,9 +20,43 @@
         <div id="word-scroll-crop">
             <div id="word-scroll"></div>
         </div>
-        
-        <br />
-        <div id="players">
+
+        <div id="search-area-left">
+            <form class="searchform" autocomplete="off" action="">
+                <div id="searchinputs" class="search-area mid-left">
+                    <div id="searchbar-container">
+                        <input type="text" id="keyword-input-left" class="keyword-input"
+                               onclick="this.value=''" />
+                    </div>
+                </div>
+            </form>
         </div>
+        
+        <div id="search-area-right">
+            <form class="searchform" autocomplete="off" action="">
+                <div id="searchinputs-right" class="search-area mid-right">
+                    <div id="searchbar-container">
+                        <input type="text" id="keyword-input-right" class="keyword-input"
+                               onclick="this.value=''" />
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="content-area bottom-left">
+            <div class="statusbox">
+                <span>status:&nbsp;</span><span id="status-left">idle</span>
+            </div>
+        </div>
+
+        <div class="content-area bottom-right">
+            <div class="statusbox">
+                <span>status:&nbsp;</span><span id="status-right">idle</span>
+            </div>
+        </div>
+
+        <br />
+        <div id="players-0" class="player-container"></div>
+        <div id="players-1" class="player-container"></div>
     </body>
 </html>
