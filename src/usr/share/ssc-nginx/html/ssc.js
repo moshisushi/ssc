@@ -40,7 +40,8 @@ function fadeIn(index, done) {
         }
     };
     pl.addEventListener("playing", function (e) {
-        e.srcElement.removeEventListener("playing", arguments.callee);
+        var target = e.target || e.srcElement;
+        target.removeEventListener("playing", arguments.callee);
         loop();
     });
 }
