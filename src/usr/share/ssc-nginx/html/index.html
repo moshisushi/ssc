@@ -25,8 +25,10 @@
             <form class="searchform" autocomplete="off" action="">
                 <div id="searchinputs" class="search-area mid-left">
                     <div id="searchbar-container">
-                        <input type="text" id="keyword-input-left" class="keyword-input"
-                               onclick="this.value=''" />
+                        <input type="text" id="keyword-input-left"
+                               maxlength="30"
+                               class="keyword-input"
+                               onclick="this.select();" />
                     </div>
                 </div>
             </form>
@@ -36,8 +38,10 @@
             <form class="searchform" autocomplete="off" action="">
                 <div id="searchinputs-right" class="search-area mid-right">
                     <div id="searchbar-container">
-                        <input type="text" id="keyword-input-right" class="keyword-input"
-                               onclick="this.value=''" />
+                        <input type="text" id="keyword-input-right"
+                               maxlength="30"
+                               class="keyword-input"
+                               onclick="this.select();" />
                     </div>
                 </div>
             </form>

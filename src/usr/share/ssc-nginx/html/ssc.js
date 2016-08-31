@@ -168,24 +168,41 @@ function hello(keyword) {
     $.get("/ssc/hello?w=" + keyword);
 }
 
+var lastFocusedInput = null;
 function streamSearch(keyword) {
-    // TODO: get selected search
-    var input = $(".keyword-input").first();
-    search(input, keyword);
+    if (!lastFocusedInput) {
+        lastFocusedInput = $(".keyword-input").first();
+    }
+    search(lastFocusedInput, keyword);
+    lastFocusedInput.select().focus();
 }
 
 var playLeft = createPlayerControl("#players-0");
 var playRight = createPlayerControl("#players-1");
 
+var searchCounter = {};
+
 function search(input, keyword) {
-    var isLeftPlayer = input[0].id === "keyword-input-left";
+    var inputId = input[0].id;
+    var isLeftPlayer = inputId === "keyword-input-left";
     var status = isLeftPlayer ? $("#status-left") : $("#status-right");
+    if (!searchCounter[inputId]) {
+        searchCounter[inputId] = 0;
+    }
+    var currentSearchCounter = searchCounter[inputId] + 1;
+    searchCounter[inputId] = currentSearchCounter;
+
     status.html("Searching...");
     input.val(keyword);
 
     keyword = _.trim(keyword).toLowerCase();
     $.get("/ssc/freesound/search/?q=" + keyword +
           "&f=duration%3A%5B1+TO+60%5D&s=score+desc&advanced=1&g=", function(res) {
+        if (currentSearchCounter != searchCounter[inputId]) {
+            // Cancel search since a new search has already been initiated
+            console.log("Cancelled search " + inputId + ": " + currentSearchCounter);
+            return;
+        }
         var pattern = /(\/data\/previews\/[^"]*\.ogg)/;
         var sounds = [];
         _.each(res.split('\n'), function(line) {
@@ -194,8 +211,17 @@ function search(input, keyword) {
             sounds.push("/ssc/freesound" + match[1]);
             if (sounds.length === 3) return false;
         });
-        status.html("found " + sounds.length + " " + (sounds.length === 1 ? "sound" : "sounds") +
-                " (limit: 3)");
+        var statusText;
+        var keywordPlain = decodeURIComponent(keyword);
+        if (sounds.length === 0) {
+            statusText = 'no "' + keywordPlain + '" sounds found';
+        } else {
+            statusText = "playing " + sounds.length + ' "' +
+                keywordPlain +
+                (sounds.length === 1 ? '" sound' : '" sounds') +
+                " (limit: 3)";
+        }
+        status.html(statusText);
         if (sounds.length === 0) {
             return;
         }
@@ -243,12 +269,14 @@ function addWords() {
     setTimeout(addWords, 10000);
 }
 
-function initKeywordInputs() {
+function initKeywordInputs(defaultInput) {
     $(".keyword-input").val(defaultInput).blur(function(e) {
         var el = $(e.target);
         if (!el.val()) {
             el.val(defaultInput);
         }
+    }).focus(function (e) {
+        lastFocusedInput = $(e.target);
     });
 }
 
@@ -259,19 +287,44 @@ function initSearch() {
         var input = $(event.target).find("input");
 
         var keyword = input.val();
-        input.blur();
 
         if(!keyword) return;
 
         search(input, keyword);
+        input.select();
     });
 }
 
-var defaultInput = "type";
+function selectFirstInput() {
+    $(".keyword-input").first().select().focus();
+}
+function selectInput(selector) {
+    $(selector).select().focus();
+}
+
+function handleTabbing() {
+    $('body').on('keydown', function (e) {
+        if (e.keyCode === 9) {
+            e.preventDefault();
+            var focused = $(".keyword-input:focus")[0];
+            if (!focused) {
+                selectFirstInput();
+            } else if (focused.id === "keyword-input-left") {
+                selectInput("#keyword-input-right");
+            } else {
+                selectInput("#keyword-input-left");
+            }
+        }
+    });
+}
 
 $(function () {
+    var defaultInput = "type";
+
     addWords();
     scroll();
-    initKeywordInputs();
+    initKeywordInputs(defaultInput);
     initSearch();
+    handleTabbing();
+    selectFirstInput();
 });
