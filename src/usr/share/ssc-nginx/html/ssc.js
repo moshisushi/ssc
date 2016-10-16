@@ -1,10 +1,12 @@
 var fadeSpeed = 0.003;
+var muteLeft = false;
+var muteRight = false;
 
 function buildPlayer(url, index) {
     console.log("buildPlayer: " + url);
     return '<div id="audioplayer-' + index + '-container">' +
         '<audio id="audioplayer-' + index +
-        '" controls="controls" autoplay loop>' +
+        '" controls="controls" loop>' +
         '<source src="' + url + '">' +
         'Your browser does not support the audio element.' +
         '</audio></div>';
@@ -64,8 +66,13 @@ function fadeOut(index) {
     loop();
 }
 
-function jumpAround(index) {
+function jumpAround(index, containerId) {
     var pl = getPlayer(index);
+    pl.play();
+    if ((containerId === "#players-0" && muteLeft) ||
+        (containerId === "#players-1" && muteRight)) {
+        pl.muted = true;
+    }
     function loop() {
         var pos = Math.random() * pl.duration;
         var dur = 200 + Math.floor(Math.random() * 2000)
@@ -153,7 +160,7 @@ function createPlayerControl(containerId) {
             playerCount++;
             players.push(playerCount);
             playersElem.append(buildPlayer(url, playerCount));
-            jumpAround(playerCount);
+            jumpAround(playerCount, containerId);
             var oldPlayer = toFadeOut.shift();
             fadeIn(playerCount, function () {
                 if (oldPlayer !== undefined) fadeOut(oldPlayer);
@@ -319,10 +326,38 @@ function handleTabbing() {
     });
 }
 
+function testAudio() {
+    return !!Modernizr.audio.ogg;
+}
+
+function initMute() {
+    $(".mute").click(function (e) {
+        var text = $(e.currentTarget).find("span");
+        var mute = text.html() === "MUTE";
+        text.html(mute ? "UNMUTE" : "MUTE");
+        var targetId = e.currentTarget.id;
+        if (targetId === "mute-left") {
+            muteLeft = mute;
+            _.each($("#players-0 audio"), function(p) {
+                p.muted = mute;
+            });
+        } else if (targetId === "mute-right") {
+            muteRight = mute;
+            _.each($("#players-1 audio"), function(p) {
+                p.muted = mute;
+            });
+        }
+    });
+}
+
 $(function () {
     var defaultInput = "type";
 
+    if(!testAudio()) {
+        window.location.replace("ohno.html");
+    }
     addWords();
+    initMute();
     scroll();
     initKeywordInputs(defaultInput);
     initSearch();
