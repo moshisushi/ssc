@@ -106,7 +106,7 @@ function addWordLine(wordIterator) {
             line.push(dashes);
         }
         var tag = '<span class="stream-word" onClick="streamSearch(' +
-            "'" + w + "'" + ');">' + w + '</span>';
+            "'" + escape(w) + "'" + ');">' + w + '</span>';
         line.push(tag);
 
         lineLength += w.length + numDashes * 1.5;
@@ -201,7 +201,7 @@ function search(input, keyword) {
     searchCounter[inputId] = currentSearchCounter;
 
     status.html("Searching...");
-    input.val(keyword);
+    input.val(unescape(keyword));
 
     keyword = _.trim(keyword).toLowerCase();
     $.get("/ssc/freesound/search/?q=" + keyword +
