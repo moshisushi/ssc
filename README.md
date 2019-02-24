@@ -1,4 +1,3 @@
-# ssc
-Source Of Some Certainty
+# Source Of Some Certainty
 
-try here ---> sourceofsomecertainty.club
+Try here ---> [sourceofsomecertainty.club]()
