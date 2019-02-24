@@ -1,3 +1,3 @@
 # Source Of Some Certainty
 
-Try here ---> [http://sourceofsomecertainty.club]()
+Try here ---> [sourceofsomecertainty.club](http://sourceofsomecertainty.club)
